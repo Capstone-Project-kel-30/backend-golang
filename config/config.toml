@@ -2,12 +2,12 @@
 port = 8081
 
 [database]
-driver = "PostgreSQL"
-db_host = "localhost"
-db_user = "postgres"
-db_pass = "arif1412"
-db_name = "cps"
-db_port = "5432"
+driver = ""
+db_host = ""
+db_user = ""
+db_pass = ""
+db_name = ""
+db_port = ""
 
 [company_email]
 name = ""
