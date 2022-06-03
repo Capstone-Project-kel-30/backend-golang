@@ -1,0 +1,15 @@
+[app]
+port = 8081
+
+[database]
+driver = "PostgreSQL"
+db_host = "localhost"
+db_user = "postgres"
+db_pass = "arif1412"
+db_name = "cps"
+db_port = "5432"
+
+[company_email]
+name = ""
+email = ""
+password = ""
