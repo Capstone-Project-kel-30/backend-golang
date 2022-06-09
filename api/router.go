@@ -2,8 +2,8 @@ package api
 
 import (
 	"gym-app/api/middleware"
-	"gym-app/api/v1/auth"
 	"gym-app/api/v1/user"
+	user_auth "gym-app/api/v1/user_auth"
 
 	service "gym-app/business/user"
 
@@ -13,15 +13,15 @@ import (
 var jwtService service.JWTService = service.NewJWTService()
 
 type Controller struct {
-	Auth *auth.AuthController
-	User *user.UserController
+	UserAuth *user_auth.AuthController
+	User     *user.UserController
 }
 
 func RegisterRoutes(e *echo.Echo, controller *Controller) {
 
-	authRoutes := e.Group("/api/v1/auth")
-	authRoutes.POST("/login", controller.Auth.Login)
-	authRoutes.POST("/register", controller.Auth.RegisterHandler)
+	userAuthRoutes := e.Group("/api/v1/auth")
+	userAuthRoutes.POST("/login", controller.UserAuth.Login)
+	userAuthRoutes.POST("/register", controller.UserAuth.RegisterHandler)
 
 	userRoutes := e.Group("/api/v1/user", middleware.AuthorizeJWT(jwtService))
 	userRoutes.GET("/profile", controller.User.Profile)

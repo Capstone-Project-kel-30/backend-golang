@@ -44,7 +44,7 @@ func (controller *AuthController) Login(c echo.Context) error {
 
 	user, _ := controller.userService.FindUserByEmail(loginRequest.Email)
 
-	token := controller.jwtService.GenerateToken((strconv.FormatInt(user.ID, 10)))
+	token := controller.jwtService.GenerateToken((strconv.Itoa(user.ID)))
 	user.Token = token
 	response := response.BuildResponse(true, "ok", user)
 	return c.JSON(http.StatusOK, response)
@@ -65,6 +65,7 @@ func (controller *AuthController) RegisterHandler(c echo.Context) error {
 	// get otp
 	totp := controller.authService.GenerateTOTP(user.Email)
 
+	user.Totp = totp
 	// send otp to email
 	sendEmail := controller.authService.SendOTPtoEmail(totp, user.Name, user.Email)
 	if sendEmail != nil {
@@ -72,7 +73,7 @@ func (controller *AuthController) RegisterHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	token := controller.jwtService.GenerateToken((strconv.FormatInt(user.ID, 10)))
+	token := controller.jwtService.GenerateToken((strconv.Itoa(user.ID)))
 	user.Token = token
 	response := response.BuildResponse(true, "OK", user)
 	return c.JSON(http.StatusOK, response)

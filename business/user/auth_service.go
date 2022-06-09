@@ -77,12 +77,12 @@ func (c *authService) SendOTPtoEmail(otp string, name string, email string) erro
 	// less secure apps needed but not working
 
 	// mail := gomail.NewMessage()
-	// mail.SetAddressHeader("From", "bens.sky69@gmail.com", "GYM30")
+	// mail.SetAddressHeader("From", "email", "GYM30")
 	// mail.SetAddressHeader("To", email, name)
 	// mail.SetHeader("Subject", "OTP")
 	// mail.SetBody("text/plain", otp)
 
-	// Send := gomail.NewDialer("smtp.gmail.com", 587, "bens.sky69@gmail.com", "arifccd972")
+	// Send := gomail.NewDialer("smtp.gmail.com", 587, "email", "pw")
 
 	// if err := Send.DialAndSend(mail); err != nil {
 	// 	panic(err)

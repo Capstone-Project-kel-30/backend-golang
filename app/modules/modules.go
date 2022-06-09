@@ -2,8 +2,8 @@ package modules
 
 import (
 	"gym-app/api"
-	"gym-app/api/v1/auth"
 	"gym-app/api/v1/user"
+	user_auth "gym-app/api/v1/user_auth"
 	authService "gym-app/business/user"
 	jwtService "gym-app/business/user"
 	userService "gym-app/business/user"
@@ -20,8 +20,8 @@ func RegisterModules(dbCon *util.DatabaseConnection, config *config.AppConfig) a
 	jwtService := jwtService.NewJWTService()
 
 	controller := api.Controller{
-		Auth: auth.NewAuthController(authService, jwtService, userService),
-		User: user.NewUserController(userService, jwtService),
+		UserAuth: user_auth.NewAuthController(authService, jwtService, userService),
+		User:     user.NewUserController(userService, jwtService),
 	}
 	return controller
 }
