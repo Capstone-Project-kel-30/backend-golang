@@ -5,19 +5,20 @@ import (
 	"fmt"
 	"log"
 
+	// "gym-app/config"
+
+	// "github.com/mailjet/mailjet-apiv3-go"
 	"github.com/pquerna/otp/totp"
 	"github.com/xlzd/gotp"
-
-	// "gopkg.in/gomail.v2"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
 	VerifyCredential(email string, password string) error
-	// CreateUser(user dto.) entity.User
 	GenerateTOTP(email string) string
 	SendOTPtoEmail(otp string, name string, email string) error
+	SendEmailVerification(otp string, email string) error
 }
 
 type authService struct {
@@ -73,19 +74,74 @@ func (c *authService) GenerateTOTP(email string) string {
 
 func (c *authService) SendOTPtoEmail(otp string, name string, email string) error {
 
-	// Setup mail server
-	// less secure apps needed but not working
+	// config := config.GetConfig()
 
-	// mail := gomail.NewMessage()
-	// mail.SetAddressHeader("From", "email", "GYM30")
-	// mail.SetAddressHeader("To", email, name)
-	// mail.SetHeader("Subject", "OTP")
-	// mail.SetBody("text/plain", otp)
+	// publicKey := config.Mailjet.PublicKey
+	// privateKey := config.Mailjet.PrivateKey
 
-	// Send := gomail.NewDialer("smtp.gmail.com", 587, "email", "pw")
+	// mailjetClient := mailjet.NewMailjetClient(publicKey, privateKey)
 
-	// if err := Send.DialAndSend(mail); err != nil {
-	// 	panic(err)
+	// htmlpart := fmt.Sprintf(`<H3>Hai %s, Terimakasih sudah daftarin dirimu di GYM30. Dibawah ini adalah kode verifikasi kamu<H3/> <h1>%s</h1>`, name, otp)
+	// messagesInfo := []mailjet.InfoMessagesV31{
+	// 	{
+	// 		From: &mailjet.RecipientV31{
+	// 			Email: "bens.sky69@gmail.com",
+	// 			Name:  "GYM30",
+	// 		},
+	// 		To: &mailjet.RecipientsV31{
+	// 			mailjet.RecipientV31{
+	// 				Email: email,
+	// 				Name:  name,
+	// 			},
+	// 		},
+	// 		Subject:  "OTP Key GYM30",
+	// 		TextPart: otp,
+	// 		HTMLPart: htmlpart,
+	// 		CustomID: "AppGettingStartedTest",
+	// 	},
 	// }
+	// messages := mailjet.MessagesV31{Info: messagesInfo}
+	// res, err := mailjetClient.SendMailV31(&messages)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
+	// log.Println(res)
+	return nil
+}
+
+func (c *authService) SendEmailVerification(otp string, email string) error {
+	// config := config.GetConfig()
+
+	// publicKey := config.Mailjet.PublicKey
+	// privateKey := config.Mailjet.PrivateKey
+
+	// mailjetClient := mailjet.NewMailjetClient(publicKey, privateKey)
+	// htmlpart := fmt.Sprintf(`<H3> Dibawah ini adalah kode verifikasi Forgot Password kamu<H3/><h1>%s</h1>`, otp)
+	// messagesInfo := []mailjet.InfoMessagesV31{
+	// 	{
+	// 		From: &mailjet.RecipientV31{
+	// 			Email: "bens.sky69@gmail.com",
+	// 			Name:  "GYM30",
+	// 		},
+	// 		To: &mailjet.RecipientsV31{
+	// 			mailjet.RecipientV31{
+	// 				Email: email,
+	// 				Name:  email,
+	// 			},
+	// 		},
+	// 		Subject:  "Forgot Password OTP Key GYM30",
+	// 		TextPart: otp,
+	// 		HTMLPart: htmlpart,
+	// 		CustomID: "AppGettingStartedTest",
+	// 	},
+	// }
+	// messages := mailjet.MessagesV31{Info: messagesInfo}
+	// res, err := mailjetClient.SendMailV31(&messages)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
+	// log.Println(res)
 	return nil
 }

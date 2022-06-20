@@ -17,6 +17,7 @@ import (
 type UserRepository interface {
 	InsertUser(user entity.User) (entity.User, error)
 	UpdateUser(user entity.User) (entity.User, error)
+	ResetPassword(user entity.User) (entity.User, error)
 	FindByEmail(email string) (entity.User, error)
 	FindByUserID(userID string) (entity.User, error)
 }
@@ -24,6 +25,7 @@ type UserRepository interface {
 type UserService interface {
 	CreateUser(registerRequest dto.RegisterRequest) (*_user.UserResponse, error)
 	UpdateUser(updateUserRequest dto.UpdateUserRequest) (*_user.UserResponse, error)
+	ResetPassword(resetPasswordRequest dto.PasswordResetRequest) (*_user.UserResponse, error)
 	FindUserByEmail(email string) (*_user.UserResponse, error)
 	FindUserByID(userID string) (*_user.UserResponse, error)
 }
@@ -54,6 +56,26 @@ func (c *userService) UpdateUser(updateUserRequest dto.UpdateUserRequest) (*_use
 	res := _user.NewUserResponse(user)
 	return &res, nil
 
+}
+
+func (c *userService) ResetPassword(resetPasswordRequest dto.PasswordResetRequest) (*_user.UserResponse, error) {
+	user, err := c.userRepo.FindByEmail(resetPasswordRequest.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	err = smapping.FillStruct(&user, smapping.MapFields(&resetPasswordRequest))
+	if err != nil {
+		return nil, err
+	}
+
+	user, _ = c.userRepo.ResetPassword(user)
+	if err != nil {
+		return nil, err
+	}
+
+	res := _user.NewUserResponse(user)
+	return &res, nil
 }
 
 func (c *userService) CreateUser(registerRequest dto.RegisterRequest) (*_user.UserResponse, error) {

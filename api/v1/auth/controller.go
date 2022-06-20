@@ -78,3 +78,44 @@ func (controller *AuthController) RegisterHandler(c echo.Context) error {
 	response := response.BuildResponse(true, "OK", user)
 	return c.JSON(http.StatusOK, response)
 }
+
+func (controller *AuthController) SendEmailVerification(c echo.Context) error {
+	var EmailVerificationRequest dto.EmailVerificationRequest
+	err := c.Bind(&EmailVerificationRequest)
+	if err != nil {
+		response := response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+	totp := controller.authService.GenerateTOTP(EmailVerificationRequest.Email)
+
+	err = controller.authService.SendEmailVerification(totp, EmailVerificationRequest.Email)
+	if err != nil {
+		response := response.BuildErrorResponse("Failed to process request", err.Error(), nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	user, err := controller.userService.FindUserByEmail(EmailVerificationRequest.Email)
+	user.Totp = totp
+
+	token := controller.jwtService.GenerateToken((strconv.Itoa(user.ID)))
+	user.Token = token
+
+	response := response.BuildResponse(true, "OK", user)
+	return c.JSON(http.StatusOK, response)
+}
+
+func (controller *AuthController) ResetPassword(c echo.Context) error {
+	var resetPasswordRequest dto.PasswordResetRequest
+	err := c.Bind(&resetPasswordRequest)
+	if err != nil {
+		response := response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+	user, err := controller.userService.ResetPassword(resetPasswordRequest)
+	if err != nil {
+		response := response.BuildErrorResponse("Failed to process request", err.Error(), nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+	response := response.BuildResponse(true, "Password Updated", user)
+	return c.JSON(http.StatusOK, response)
+}

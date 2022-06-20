@@ -35,8 +35,13 @@ func (c *PostgresRepository) UpdateUser(user entity.User) (entity.User, error) {
 		c.db.Find(&tempUser, user.ID)
 		user.Password = tempUser.Password
 	}
-
 	c.db.Save(&user)
+	return user, nil
+
+}
+func (c *PostgresRepository) ResetPassword(user entity.User) (entity.User, error) {
+	user.Password = hashAndSalt([]byte(user.Password))
+	c.db.Model(&user).Update("password", user.Password)
 	return user, nil
 }
 

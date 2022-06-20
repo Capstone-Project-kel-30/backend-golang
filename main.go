@@ -13,9 +13,8 @@ import (
 	"gym-app/config"
 	"gym-app/util"
 
-	"gorm.io/gorm"
-
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
@@ -23,6 +22,7 @@ var DB *gorm.DB
 func main() {
 
 	config := config.GetConfig()
+
 	dbCon := util.NewConnectionDatabase(config)
 
 	controllers := modules.RegisterModules(dbCon, config)
@@ -36,8 +36,9 @@ func main() {
 	api.RegisterRoutes(e, &controllers)
 
 	port := os.Getenv("PORT")
+	port2 := config.App.Port
 	if port == "" {
-		port = "8085"
+		port = port2
 	}
 	e.Logger.Fatal(e.Start(":" + port))
 
@@ -52,4 +53,5 @@ func main() {
 	if err := e.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
+
 }

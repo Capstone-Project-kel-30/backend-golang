@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"gym-app/config"
 	"os"
 	"time"
 
@@ -32,9 +33,11 @@ func NewJWTService() JWTService {
 }
 
 func getSecretKey() string {
+	config := config.GetConfig()
+	jwtKey := config.App.JWTKey
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey != "" {
-		secretKey = "system"
+		secretKey = jwtKey
 	}
 	return secretKey
 }
