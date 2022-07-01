@@ -11,10 +11,10 @@ type Response struct {
 }
 
 //BuildResponse method is to inject data value to dynamic success response
-func BuildResponse(status bool, message string, data interface{}) Response {
+func BuildSuccsessResponse(message string, status bool, data interface{}) Response {
 	res := Response{
-		Status:  status,
 		Message: message,
+		Status:  status,
 		Errors:  nil,
 		Data:    data,
 	}

@@ -3,8 +3,8 @@ package user
 import (
 	"log"
 
-	"gym-app/business/user"
-	"gym-app/business/user/entity"
+	"github.com/mashbens/cps/business/user"
+	"github.com/mashbens/cps/business/user/entity"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -21,41 +21,46 @@ func NewPostgresRepository(db *gorm.DB) user.UserRepository {
 	}
 }
 
-func (c *PostgresRepository) InsertUser(user entity.User) (entity.User, error) {
+func (r *PostgresRepository) InsertUser(user entity.User) (entity.User, error) {
 	user.Password = hashAndSalt([]byte(user.Password))
-	c.db.Save(&user)
-	return user, nil
-}
-
-func (c *PostgresRepository) UpdateUser(user entity.User) (entity.User, error) {
-	if user.Password != "" {
-		user.Password = hashAndSalt([]byte(user.Password))
-	} else {
-		var tempUser entity.User
-		c.db.Find(&tempUser, user.ID)
-		user.Password = tempUser.Password
-	}
-
-	c.db.Save(&user)
-	return user, nil
-}
-
-func (c *PostgresRepository) FindByEmail(email string) (entity.User, error) {
-	var user entity.User
-	res := c.db.Where("email = ?", email).Take(&user)
+	record := fromService(user)
+	res := r.db.Create(&record)
 	if res.Error != nil {
-		return user, res.Error
+		return record.toService(), res.Error
 	}
-	return user, nil
+	return record.toService(), nil
+
 }
 
-func (c *PostgresRepository) FindByUserID(userID string) (entity.User, error) {
-	var user entity.User
-	res := c.db.Where("id = ?", userID).Take(&user)
+func (r *PostgresRepository) FindByEmail(email string) (entity.User, error) {
+	var record User
+	res := r.db.Where("email = ?", email).Take(&record)
 	if res.Error != nil {
-		return user, res.Error
+		return record.toService(), res.Error
 	}
-	return user, nil
+	return record.toService(), nil
+
+}
+func (r *PostgresRepository) ResetPassword(user entity.User) (entity.User, error) {
+
+	record := fromService(user)
+	record.Password = hashAndSalt([]byte(user.Password))
+	res := r.db.Model(&user).Where("email = ?", record.Email).Update("password", record.Password)
+	if res.Error != nil {
+		return record.toService(), res.Error
+	}
+
+	res = r.db.Where("email = ?", record.Email).Take(&record)
+	return record.toService(), nil
+}
+
+func (r *PostgresRepository) FindByUserID(userID string) (entity.User, error) {
+	var record User
+	res := r.db.Where("id = ?", userID).Take(&record)
+	if res.Error != nil {
+		return record.toService(), res.Error
+	}
+	return record.toService(), nil
 }
 
 func hashAndSalt(pwd []byte) string {
@@ -65,4 +70,61 @@ func hashAndSalt(pwd []byte) string {
 		panic("Failed to hash a password")
 	}
 	return string(hash)
+}
+
+func (r *PostgresRepository) UpdateUser(user entity.User) (entity.User, error) {
+
+	record := fromService(user)
+
+	var tempRecord User
+	r.db.Find(&tempRecord, user.ID)
+
+	if record.Password != "" {
+		record.Password = hashAndSalt([]byte(user.Password))
+	} else {
+		r.db.Find(&tempRecord, user.ID)
+		record.Password = tempRecord.Password
+	}
+
+	if record.Email != "" {
+		record.Email = user.Email
+	} else {
+		record.Email = tempRecord.Email
+	}
+
+	if record.Phone != "" {
+		record.Phone = user.Phone
+	} else {
+		record.Phone = tempRecord.Phone
+	}
+
+	if record.Name != "" {
+		record.Name = user.Name
+	} else {
+		record.Name = tempRecord.Name
+	}
+
+	if record.Member_expired != "" {
+		record.Member_expired = user.Member_expired
+	} else {
+		record.Member_expired = tempRecord.Member_expired
+	}
+
+	if record.Member_type != "" {
+		record.Member_type = user.Member_type
+	} else {
+		record.Member_type = tempRecord.Member_type
+	}
+
+	r.db.Save(&record)
+	return record.toService(), nil
+}
+
+func (r *PostgresRepository) UpdateUserExpiry(userID string, expiry string, memberType string) error {
+	var record User
+	res := r.db.Model(&record).Where("id = ?", userID).Updates(map[string]interface{}{"member_expired": expiry, "member_type": memberType})
+	if res != nil {
+		return nil
+	}
+	return nil
 }

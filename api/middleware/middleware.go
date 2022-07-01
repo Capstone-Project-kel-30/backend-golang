@@ -6,9 +6,9 @@ import (
 
 	"github.com/golang-jwt/jwt"
 
-	"gym-app/api/common/obj"
-	"gym-app/api/common/response"
-	service "gym-app/business/user"
+	"github.com/mashbens/cps/api/common/obj"
+	"github.com/mashbens/cps/api/common/response"
+	service "github.com/mashbens/cps/business/user"
 
 	"github.com/labstack/echo/v4"
 )

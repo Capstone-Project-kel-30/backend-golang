@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/mashbens/cps/config"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
@@ -32,9 +34,11 @@ func NewJWTService() JWTService {
 }
 
 func getSecretKey() string {
+	config := config.GetConfig()
+	jwtKey := config.App.JWTKey
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey != "" {
-		secretKey = "system"
+		secretKey = jwtKey
 	}
 	return secretKey
 }

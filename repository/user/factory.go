@@ -1,8 +1,8 @@
 package user
 
 import (
-	"gym-app/business/user"
-	"gym-app/util"
+	"github.com/mashbens/cps/business/user"
+	"github.com/mashbens/cps/util"
 )
 
 func RepositoryFactory(dbCon *util.DatabaseConnection) user.UserRepository {
@@ -10,6 +10,8 @@ func RepositoryFactory(dbCon *util.DatabaseConnection) user.UserRepository {
 
 	if dbCon.Driver == util.PostgreSQL {
 		userRepository = NewPostgresRepository(dbCon.PostgreSQL)
+		dbCon.PostgreSQL.AutoMigrate(&User{})
+
 	} else {
 		panic("Database driver not supported")
 	}

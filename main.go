@@ -8,17 +8,15 @@ import (
 	"os/signal"
 	"time"
 
-	"gym-app/api"
-	"gym-app/app/modules"
-	"gym-app/config"
-	"gym-app/util"
+	"github.com/mashbens/cps/api"
+	"github.com/mashbens/cps/app/modules"
+	"github.com/mashbens/cps/config"
 
-	"gorm.io/gorm"
+	"github.com/mashbens/cps/util"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
-
-var DB *gorm.DB
 
 func main() {
 
@@ -28,9 +26,13 @@ func main() {
 	controllers := modules.RegisterModules(dbCon, config)
 
 	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK!!")
+		return c.String(http.StatusOK, "Ditinggal pas lagi capston-capstonya - Gilan 2022")
 	})
 
 	api.RegisterRoutes(e, &controllers)
@@ -39,6 +41,7 @@ func main() {
 	if port == "" {
 		port = "8085"
 	}
+
 	e.Logger.Fatal(e.Start(":" + port))
 
 	quit := make(chan os.Signal)

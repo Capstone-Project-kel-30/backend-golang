@@ -1,11 +1,13 @@
 package entity
 
-import "gorm.io/gorm"
-
 type User struct {
-	ID       int64  `gorm:"primary_key:auto_increment" json:"-"`
-	Name     string `gorm:"type:varchar(100)" json:"-"`
-	Email    string `gorm:"type:varchar(100);unique;" json:"-"`
-	Password string `gorm:"type:varchar(100)" json:"-"`
-	*gorm.Model
+	ID             int
+	Name           string
+	Email          string
+	Phone          string
+	Password       string
+	Token          string
+	Member_expired string
+	Member_type    string
+	Totp           string
 }

@@ -9,8 +9,8 @@ import (
 
 type AppConfig struct {
 	App struct {
-		Port   int    `toml:"port" mapstructure:"port"`
-		JWTKey string `toml:"jwt_key"`
+		Port   string `toml:"port" mapstructure:"port"`
+		JWTKey string `toml:"jwtkey"`
 	} `toml:"app"`
 	Database struct {
 		Driver  string `toml:"driver"`
@@ -20,11 +20,15 @@ type AppConfig struct {
 		DB_Pass string `toml:"db_pass"`
 		DB_Name string `toml:"db_name"`
 	} `toml:"database"`
-	CompanyEmail struct {
-		Name     string `toml:"name"`
-		Email    string `toml:"email"`
-		Password string `toml:"password"`
-	} `toml:"company_email"`
+	Mailjet struct {
+		PublicKey  string `toml:"publicKey"`
+		PrivateKey string `toml:"privatekey"`
+		Email      string `toml:"email"`
+	} `toml:"mailjet"`
+	Midtrans struct {
+		ClientKey string `toml:"clientKey"`
+		ServerKey string `toml:"serverKey"`
+	} `toml:"midtrans"`
 }
 
 var lock = &sync.Mutex{}
@@ -42,7 +46,7 @@ func GetConfig() *AppConfig {
 
 func initConfig() *AppConfig {
 	var defaultConfig AppConfig
-	defaultConfig.App.Port = 8081
+	defaultConfig.App.Port = "8081"
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("toml")

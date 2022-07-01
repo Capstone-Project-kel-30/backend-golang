@@ -2,78 +2,133 @@ package auth
 
 import (
 	"net/http"
-	"strconv"
 
-	"gym-app/api/common/response"
-	service "gym-app/business/user"
-	"gym-app/business/user/dto"
+	_response "github.com/mashbens/cps/api/common/response"
+	"github.com/mashbens/cps/api/v1/auth/request"
+	"github.com/mashbens/cps/api/v1/auth/resp"
+	service "github.com/mashbens/cps/business/user"
 
 	"github.com/labstack/echo/v4"
 )
 
 type AuthController struct {
 	authService service.AuthService
-	jwtService  service.JWTService
 	userService service.UserService
 }
 
 func NewAuthController(
 	authService service.AuthService,
-	jwtService service.JWTService,
 	userService service.UserService,
 ) *AuthController {
 	return &AuthController{
 		authService: authService,
-		jwtService:  jwtService,
 		userService: userService,
 	}
 }
 
-func (controller *AuthController) Login(c echo.Context) error {
-	var loginRequest dto.LoginRequest
-	err := c.Bind(&loginRequest)
+func (controller *AuthController) RegisterHandler(c echo.Context) error {
+	var newUser request.RegisterRequest
+	err := c.Bind(&newUser)
 	if err != nil {
-		response := response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
 		return c.JSON(http.StatusBadRequest, response)
 	}
-	err = controller.authService.VerifyCredential(loginRequest.Email, loginRequest.Password)
-	if err != nil {
-		response := response.BuildErrorResponse("Failed to process request", "Invalid credentials", nil)
+	if newUser.Email == "" || newUser.Password == "" || newUser.Name == "" || newUser.Phone == "" {
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+	if len(newUser.Password) < 6 {
+		response := _response.BuildErrorResponse("Failed to process request", "Password must be at least 6 characters", nil)
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	user, _ := controller.userService.FindUserByEmail(loginRequest.Email)
+	user, err := controller.authService.Register(request.NewRegisterRequest(newUser))
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
 
-	token := controller.jwtService.GenerateToken((strconv.FormatInt(user.ID, 10)))
-	user.Token = token
-	response := response.BuildResponse(true, "ok", user)
-	return c.JSON(http.StatusOK, response)
+	data := resp.FromService(*user)
+	_response := _response.BuildSuccsessResponse("User created successfully", true, data)
+	return c.JSON(http.StatusOK, _response)
 }
 
-func (controller *AuthController) RegisterHandler(c echo.Context) error {
-	var registerRequest dto.RegisterRequest
-	err := c.Bind(&registerRequest)
+func (controller *AuthController) LoginHandler(c echo.Context) error {
+	var loginRequest request.LoginRequest
+	err := c.Bind(&loginRequest)
 	if err != nil {
-		response := response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
 		return c.JSON(http.StatusBadRequest, response)
-	}
-	user, err := controller.userService.CreateUser(registerRequest)
-	if err != nil {
-		response := response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusBadRequest, response)
-	}
-	// get otp
-	totp := controller.authService.GenerateTOTP(user.Email)
 
-	// send otp to email
-	sendEmail := controller.authService.SendOTPtoEmail(totp, user.Name, user.Email)
-	if sendEmail != nil {
-		response := response.BuildErrorResponse("Failed to process request", sendEmail.Error(), nil)
+	}
+
+	if loginRequest.Email == "" || loginRequest.Password == "" {
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	token := controller.jwtService.GenerateToken((strconv.FormatInt(user.ID, 10)))
-	user.Token = token
-	response := response.BuildResponse(true, "OK", user)
-	return c.JSON(http.StatusOK, response)
+	user, err := controller.authService.Login(request.NewLoginRequest(loginRequest))
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	data := resp.FromService(*user)
+	_response := _response.BuildSuccsessResponse("User logged in successfully", true, data)
+	return c.JSON(http.StatusOK, _response)
+}
+
+// ---
+func (controller *AuthController) FindUserByEmailHandler(c echo.Context) error {
+	var FindByEmail request.FindUserByEmailRequest
+	err := c.Bind(&FindByEmail)
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+	user, err := controller.userService.FindUserByEmail(FindByEmail.Email)
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	data := resp.FromService(*user)
+	_response := _response.BuildSuccsessResponse("User found successfully", true, data)
+	return c.JSON(http.StatusOK, _response)
+}
+
+func (controller *AuthController) EmailVerificationHandler(c echo.Context) error {
+	var emailVerificationRequest request.EmailVerificationRequest
+	err := c.Bind(&emailVerificationRequest)
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+	user, err := controller.authService.SendEmailVerification(request.NewEmailVerificationRequest(emailVerificationRequest))
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	data := resp.FromService(*user)
+	_response := _response.BuildSuccsessResponse("User verified successfully", true, data)
+	return c.JSON(http.StatusOK, _response)
+}
+
+func (controller *AuthController) ForgotPasswordHandler(c echo.Context) error {
+	var forgotPasswordRequest request.PasswordResetRequest
+	err := c.Bind(&forgotPasswordRequest)
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+	user, err := controller.authService.ResetPassword(request.NewPasswordResetRequest(forgotPasswordRequest))
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	data := resp.FromService(*user)
+	_response := _response.BuildSuccsessResponse("User Password reset successfully", true, data)
+	return c.JSON(http.StatusOK, _response)
 }
