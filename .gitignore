@@ -12,7 +12,7 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
-# config/config.toml
+vendor/
+config/config.toml
 
 dist/
