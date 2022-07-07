@@ -1,0 +1,23 @@
+[app]
+port = "8085"
+jwtkey = "system"
+
+
+[database]
+driver = "PostgreSQL"
+db_host = "ec2-52-204-195-41.compute-1.amazonaws.com"
+db_user = "mqbxzjpyhvbnsm"
+db_pass = "988ec49213ae40c73aab1c2faf822e51ac00f615440bbeb90e6355d08fa7171e"
+db_name = "d2ltob90smgs0u"
+db_port = "5432"
+
+
+
+[mailjet]
+email = "bens.sky69@gmail.com"
+publicKey = "1ccc7215dbdaddb1e70b0ebc1069fed6"
+privatekey = "84108b1c5ae4bd0bf33ba15112749f20"
+
+[midtrans]
+clientKey = "SB-Mid-client-EA0xRCdwdadMUaf7"
+ServerKey = "SB-Mid-server-v2sHF5XNWG7yBDyFo_qOw8HU"
