@@ -13,8 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils \
 
 RUN chgrp -R 0 /gym-app \
   && chmod -R g=u /gym-app \
-  && pip install pip --upgrade \
-  && pip install -r requirements.txt
+  && pip install pip --upgrade 
 EXPOSE $PORT
 
 CMD gunicorn app:server --bind 0.0.0.0:$PORT --preload
