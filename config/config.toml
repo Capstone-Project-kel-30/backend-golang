@@ -5,10 +5,10 @@ jwtkey = "system"
 
 [database]
 driver = "PostgreSQL"
-db_host = "ec2-52-204-195-41.compute-1.amazonaws.com"
-db_user = "mqbxzjpyhvbnsm"
-db_pass = "988ec49213ae40c73aab1c2faf822e51ac00f615440bbeb90e6355d08fa7171e"
-db_name = "d2ltob90smgs0u"
+db_host = "ec2-54-159-22-90.compute-1.amazonaws.com"
+db_user = "pzhvxgmkzwkklf"
+db_pass = "79677f0e503409c7efe11cd4402444fbc6d25886136f690df6787b4170279656"
+db_name = "dbtlv9se8otn84"
 db_port = "5432"
 
 
