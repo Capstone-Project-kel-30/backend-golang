@@ -46,7 +46,7 @@ func (controller *ClassController) GetClassByID(c echo.Context) error {
 	class, err := controller.classService.FindClassByID(id)
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromService(*class)
 	_response := _response.BuildSuccsessResponse("Member found", true, data)
@@ -81,7 +81,7 @@ func (controller *ClassController) GetClassOnlineByID(c echo.Context) error {
 	class, err := controller.classService.FindClassOnByID(id)
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromService(*class)
 	_response := _response.BuildSuccsessResponse("Member found", true, data)
@@ -96,7 +96,7 @@ func (controller *ClassController) GetClassOfflineByID(c echo.Context) error {
 	class, err := controller.classService.FindClassOffByID(id)
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromService(*class)
 	_response := _response.BuildSuccsessResponse("Member found", true, data)
@@ -125,12 +125,19 @@ func (controller *ClassController) CreateClass(c echo.Context) error {
 	token := controller.jwtService.ValidateToken(header, c)
 	if header == "" {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	if token == nil {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
+		return c.JSON(http.StatusUnauthorized, response)
+	}
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
 		return c.JSON(http.StatusBadRequest, response)
 	}
+	newClass.ImgBB = file
 	claims := token.Claims.(jwt.MapClaims)
 	id := fmt.Sprintf("%v", claims["user_id"])
 	adminintID, err := strconv.Atoi(id)
@@ -139,7 +146,7 @@ func (controller *ClassController) CreateClass(c echo.Context) error {
 	class, err := controller.classService.InsertClass(request.NewCreateClassReq(newClass))
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromService(*class)
 	_response := _response.BuildSuccsessResponse("Class created successfully", true, data)
@@ -159,15 +166,22 @@ func (controller *ClassController) UpdateClass(c echo.Context) error {
 	token := controller.jwtService.ValidateToken(header, c)
 	if header == "" {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	if token == nil {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	paramId := c.Param("id")
 	intID, err := strconv.Atoi(paramId)
 	newClass.ID = intID
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+	newClass.ImgBB = file
 
 	claims := token.Claims.(jwt.MapClaims)
 	id := fmt.Sprintf("%v", claims["user_id"])
@@ -177,7 +191,7 @@ func (controller *ClassController) UpdateClass(c echo.Context) error {
 	class, err := controller.classService.UpdateClass(request.NewCreateClassReq(newClass))
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromService(*class)
 	_response := _response.BuildSuccsessResponse("Member found", true, data)
@@ -191,18 +205,21 @@ func (controller *ClassController) DeleteClass(c echo.Context) error {
 	token := controller.jwtService.ValidateToken(header, c)
 	if header == "" {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	if token == nil {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	adminID := fmt.Sprintf("%v", claims["user_id"])
 	memberID := c.Param("id")
 
 	member := controller.classService.DeleteClass(adminID, memberID)
-	_ = member
+	if member != nil {
+		response := _response.BuildErrorResponse("Failed to process request", "Class not found", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
 
 	_response := _response.BuildSuccsessResponse("Class Deleted", true, nil)
 	return c.JSON(http.StatusOK, _response)

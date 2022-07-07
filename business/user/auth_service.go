@@ -145,40 +145,40 @@ func (c *authService) GenerateTOTP(email string) string {
 
 func (c *authService) SendOTPtoEmail(otp string, name string, email string) error {
 
-	config := config.GetConfig()
+	// config := config.GetConfig()
 
-	companyEmail := config.Mailjet.Email
-	publicKey := config.Mailjet.PublicKey
-	privateKey := config.Mailjet.PrivateKey
+	// companyEmail := config.Mailjet.Email
+	// publicKey := config.Mailjet.PublicKey
+	// privateKey := config.Mailjet.PrivateKey
 
-	mailjetClient := mailjet.NewMailjetClient(publicKey, privateKey)
+	// mailjetClient := mailjet.NewMailjetClient(publicKey, privateKey)
 
-	htmlpart := fmt.Sprintf(`<H3>Hai %s, Terimakasih sudah daftarin dirimu di GYM30. Dibawah ini adalah kode verifikasi kamu<H3/> <h1>%s</h1>`, name, otp)
-	messagesInfo := []mailjet.InfoMessagesV31{
-		{
-			From: &mailjet.RecipientV31{
-				Email: companyEmail,
-				Name:  "GYM30",
-			},
-			To: &mailjet.RecipientsV31{
-				mailjet.RecipientV31{
-					Email: email,
-					Name:  name,
-				},
-			},
-			Subject:  "OTP Key GYM30",
-			TextPart: otp,
-			HTMLPart: htmlpart,
-			CustomID: "AppGettingStartedTest",
-		},
-	}
-	messages := mailjet.MessagesV31{Info: messagesInfo}
-	res, err := mailjetClient.SendMailV31(&messages)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	log.Println(res)
+	// htmlpart := fmt.Sprintf(`<H3>Hai %s, Terimakasih sudah daftarin dirimu di GYM30. Dibawah ini adalah kode verifikasi kamu<H3/> <h1>%s</h1>`, name, otp)
+	// messagesInfo := []mailjet.InfoMessagesV31{
+	// 	{
+	// 		From: &mailjet.RecipientV31{
+	// 			Email: companyEmail,
+	// 			Name:  "GYM30",
+	// 		},
+	// 		To: &mailjet.RecipientsV31{
+	// 			mailjet.RecipientV31{
+	// 				Email: email,
+	// 				Name:  name,
+	// 			},
+	// 		},
+	// 		Subject:  "OTP Key GYM30",
+	// 		TextPart: otp,
+	// 		HTMLPart: htmlpart,
+	// 		CustomID: "AppGettingStartedTest",
+	// 	},
+	// }
+	// messages := mailjet.MessagesV31{Info: messagesInfo}
+	// res, err := mailjetClient.SendMailV31(&messages)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
+	// log.Println(res)
 	return nil
 }
 
@@ -222,6 +222,8 @@ func (c *authService) SendEmailVerification(email string) (*entity.User, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	user.Totp = otp
+
 	return user, nil
 }

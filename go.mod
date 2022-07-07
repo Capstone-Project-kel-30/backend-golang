@@ -17,6 +17,7 @@ require (
 )
 
 require (
+	github.com/JohnNON/ImgBB v0.0.0-20210314122658-9186d7ac8ee3
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

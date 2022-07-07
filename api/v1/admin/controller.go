@@ -49,11 +49,11 @@ func (controller *AdminController) RegisteAdmin(c echo.Context) error {
 	token := controller.jwtService.ValidateToken(header, c)
 	if header == "" {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	if token == nil {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -65,7 +65,7 @@ func (controller *AdminController) RegisteAdmin(c echo.Context) error {
 	admin, err := controller.adminService.InsertAdmin(request.NewAdminReq(newAdmin))
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromServiceAdmin(*admin)
 	_response := _response.BuildSuccsessResponse("Admin created successfully", true, data)
@@ -79,10 +79,15 @@ func (controller *AdminController) LoginAdmin(c echo.Context) error {
 		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
 		return c.JSON(http.StatusBadRequest, response)
 	}
+
+	if newAdmin.Email == "" || newAdmin.Password == "" {
+		response := _response.BuildErrorResponse("Failed to process request", "Invalid request body", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
 	admin, err := controller.adminService.AdminLogin(request.NewAdminReq(newAdmin))
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromServiceAdmin(*admin)
 	_response := _response.BuildSuccsessResponse("Admin login successfully", true, data)
@@ -94,11 +99,11 @@ func (controller *AdminController) FindAdminByID(c echo.Context) error {
 	token := controller.jwtService.ValidateToken(header, c)
 	if header == "" {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	if token == nil {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	sAdminID := fmt.Sprintf("%v", claims["user_id"])
@@ -107,7 +112,7 @@ func (controller *AdminController) FindAdminByID(c echo.Context) error {
 	admin, err := controller.adminService.FindAdminBySA(sAdminID, adminID)
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromServiceAdmin(*admin)
 	_response := _response.BuildSuccsessResponse("Admin found", true, data)
@@ -119,11 +124,11 @@ func (controller *AdminController) FindAllAdmins(c echo.Context) error {
 	token := controller.jwtService.ValidateToken(header, c)
 	if header == "" {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	if token == nil {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	sAdminID := fmt.Sprintf("%v", claims["user_id"])
@@ -152,11 +157,11 @@ func (controller *AdminController) UpdateAdmin(c echo.Context) error {
 	token := controller.jwtService.ValidateToken(header, c)
 	if header == "" {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	if token == nil {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -170,7 +175,7 @@ func (controller *AdminController) UpdateAdmin(c echo.Context) error {
 	admin, err := controller.adminService.UpdateAdmin(request.NewAdminReq(newAdmin))
 	if err != nil {
 		response := _response.BuildErrorResponse("Failed to process request", err.Error(), nil)
-		return c.JSON(http.StatusInternalServerError, response)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	data := resp.FromServiceAdmin(*admin)
 	_response := _response.BuildSuccsessResponse("Admin Updated successfully", true, data)
@@ -181,18 +186,21 @@ func (controller *AdminController) DeleteAdmin(c echo.Context) error {
 	token := controller.jwtService.ValidateToken(header, c)
 	if header == "" {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	if token == nil {
 		response := _response.BuildErrorResponse("Failed to process request", "Failed to validate token", nil)
-		return c.JSON(http.StatusBadRequest, response)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	sAdminID := fmt.Sprintf("%v", claims["user_id"])
 	adminID := c.Param("id")
 
 	member := controller.adminService.DeleteAdmin(sAdminID, adminID)
-	_ = member
+	if member != nil {
+		response := _response.BuildErrorResponse("Failed to process request", "Admin not found", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
 
 	_response := _response.BuildSuccsessResponse("Admin Deleted", true, nil)
 	return c.JSON(http.StatusOK, _response)
