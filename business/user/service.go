@@ -3,15 +3,16 @@ package user
 import (
 	"errors"
 
+	"github.com/go-playground/validator"
 	"github.com/mashbens/cps/business/user/entity"
 )
 
 type UserRepository interface {
-	InsertUser(user entity.User) (entity.User, error)
-	UpdateUser(user entity.User) (entity.User, error)
-	ResetPassword(user entity.User) (entity.User, error)
-	FindByEmail(email string) (entity.User, error)
-	FindByUserID(userID string) (entity.User, error)
+	InsertUser(user entity.User) (*entity.User, error)
+	UpdateUser(user entity.User) (*entity.User, error)
+	ResetPassword(user entity.User) (*entity.User, error)
+	FindByEmail(email string) (*entity.User, error)
+	FindByUserID(userID string) (*entity.User, error)
 	UpdateUserExpiry(userID string, expiry string, memberType string) error
 }
 
@@ -26,6 +27,7 @@ type UserService interface {
 
 type userService struct {
 	userRepo UserRepository
+	validate *validator.Validate
 }
 
 func NewUserService(
@@ -33,58 +35,53 @@ func NewUserService(
 ) UserService {
 	return &userService{
 		userRepo: userRepo,
+		validate: validator.New(),
 	}
 }
 
 func (c *userService) CreateUser(user entity.User) (*entity.User, error) {
 
-	u, err := c.userRepo.FindByEmail(user.Email)
+	_, err := c.userRepo.FindByEmail(user.Email)
 	if err == nil {
 		return nil, errors.New("user already exists")
 	}
 
-	u, err = c.userRepo.InsertUser(user)
+	usr, err := c.userRepo.InsertUser(user)
 	if err != nil {
 		return nil, err
 	}
-	return &u, nil
+	return usr, nil
 }
 
 func (c *userService) FindUserByEmail(email string) (*entity.User, error) {
-	user, err := c.userRepo.FindByEmail(email)
+	usr, err := c.userRepo.FindByEmail(email)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return usr, nil
 }
 
 func (c *userService) ResetPassword(user entity.User) (*entity.User, error) {
 
 	u, err := c.userRepo.ResetPassword(user)
 	if err != nil {
-		return nil, errors.New("user not found")
+		return nil, err
 	}
 
-	return &u, nil
+	return u, nil
 }
 
 func (c *userService) FindUserByID(userID string) (*entity.User, error) {
-	user, err := c.userRepo.FindByUserID(userID)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
+	return c.userRepo.FindByUserID(userID)
 }
 
 func (c *userService) UpdateUser(user entity.User) (*entity.User, error) {
-	user, err := c.userRepo.UpdateUser(user)
+	usr, err := c.userRepo.UpdateUser(user)
 	if err != nil {
 		return nil, err
 	}
 
-	// logic update changes to service
-
-	return &user, nil
+	return usr, nil
 }
 
 func (c *userService) UpdateUserExpiry(userID string, expiry string, memberType string) error {
