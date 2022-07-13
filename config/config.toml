@@ -5,10 +5,10 @@ jwtkey = "system"
 
 [database]
 driver = "PostgreSQL"
-db_host = "ec2-54-159-22-90.compute-1.amazonaws.com"
-db_user = "pzhvxgmkzwkklf"
-db_pass = "79677f0e503409c7efe11cd4402444fbc6d25886136f690df6787b4170279656"
-db_name = "dbtlv9se8otn84"
+db_host = "localhost"
+db_user = "postgres"
+db_pass = "arif1412"
+db_name = "cps"
 db_port = "5432"
 
 
@@ -21,3 +21,6 @@ privatekey = "84108b1c5ae4bd0bf33ba15112749f20"
 [midtrans]
 clientKey = "SB-Mid-client-EA0xRCdwdadMUaf7"
 ServerKey = "SB-Mid-server-v2sHF5XNWG7yBDyFo_qOw8HU"
+
+[imgbb]
+key = "02406488a81ff26d2a22b6306b6b21f9"
