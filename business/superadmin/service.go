@@ -61,7 +61,6 @@ func (c *superAdminSevice) CreateSuperAdmin(sAdmin entity.SuperAdmin) (*entity.S
 }
 
 func (c *superAdminSevice) Login(admin entity.SuperAdmin) (*entity.SuperAdmin, error) {
-	// verify credential
 
 	err := c.VerifyCredential(admin.Name, admin.Password)
 	if err != nil {

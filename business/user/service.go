@@ -46,27 +46,20 @@ func (c *userService) CreateUser(user entity.User) (*entity.User, error) {
 		return nil, errors.New("user already exists")
 	}
 
-	usr, err := c.userRepo.InsertUser(user)
-	if err != nil {
-		return nil, err
-	}
+	usr, _ := c.userRepo.InsertUser(user)
+
 	return usr, nil
 }
 
 func (c *userService) FindUserByEmail(email string) (*entity.User, error) {
-	usr, err := c.userRepo.FindByEmail(email)
-	if err != nil {
-		return nil, err
-	}
+	usr, _ := c.userRepo.FindByEmail(email)
+
 	return usr, nil
 }
 
 func (c *userService) ResetPassword(user entity.User) (*entity.User, error) {
 
-	u, err := c.userRepo.ResetPassword(user)
-	if err != nil {
-		return nil, err
-	}
+	u, _ := c.userRepo.ResetPassword(user)
 
 	return u, nil
 }
@@ -76,10 +69,7 @@ func (c *userService) FindUserByID(userID string) (*entity.User, error) {
 }
 
 func (c *userService) UpdateUser(user entity.User) (*entity.User, error) {
-	usr, err := c.userRepo.UpdateUser(user)
-	if err != nil {
-		return nil, err
-	}
+	usr, _ := c.userRepo.UpdateUser(user)
 
 	return usr, nil
 }

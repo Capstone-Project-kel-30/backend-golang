@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/mashbens/cps/business/user"
@@ -20,6 +19,160 @@ var user1, user2, user3 userEntity.User
 func TestMain(m *testing.M) {
 	setup()
 	os.Exit(m.Run())
+}
+
+func TestGetCustomerByID(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		sID := strconv.Itoa(user1.ID)
+		result, _ := service.FindUserByID(sID)
+		if result.ID != user1.ID {
+			t.Error("Expect found user id 1")
+		}
+	})
+}
+
+func TestGetCustomerByEmail(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		res, _ := service.FindUserByEmail(user1.Email)
+		if res.ID != user1.ID {
+			t.Error("Expect found user id 1")
+		}
+
+	})
+}
+func TestCreateUser(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		res, err := service.CreateUser(user1)
+		if res != nil {
+			t.Error("Expect create  user")
+		} else if err == nil {
+			t.Error("Expect create  user already exist", err)
+
+		}
+
+	})
+}
+
+func TestResetPass(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		res, err := service.ResetPassword(user1)
+		if err != nil {
+			t.Error("Expect reset user", err)
+		} else if res == nil {
+			t.Error("Expect reset user", err)
+		}
+
+	})
+}
+
+func TestUpdateUser(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		res, err := service.UpdateUser(user1)
+		if err != nil {
+			t.Error("Expect update user", err)
+		} else if res == nil {
+			t.Error("Expect update user", err)
+		}
+
+	})
+}
+
+func TestUpdateUserEx(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		err := service.UpdateUserExpiry(strconv.Itoa(user1.ID), "12", "1")
+		if err != nil {
+			t.Error("Expect update user", err)
+		}
+
+	})
+}
+
+// ---------------auth------------
+
+func TestGenerateToken(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		err := jwtService.GenerateToken(strconv.Itoa(user1.ID))
+		if err == "" {
+			t.Error("Expect", err)
+		}
+	})
+}
+
+func TestGenerateTOTP(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		err := authService.GenerateTOTP(strconv.Itoa(user1.ID))
+		if err == "" {
+			t.Error("Expect", err)
+		}
+	})
+}
+func TestSendOTPtoEmail(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		err := authService.SendOTPtoEmail("091233", user1.Name, user1.Email)
+		if err != nil {
+			t.Error("Expect", err)
+		}
+	})
+}
+func TestSendEmailVerification(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		res, err := authService.SendEmailVerification(user1.Email)
+		if err == nil {
+			t.Error("Expect", err)
+		}
+		if res != nil {
+			t.Error("Expect", err)
+
+		}
+	})
+}
+func TestSendEmailForgotPassword(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		res, err := authService.SendEmailForgotPassword(user1)
+		if err != nil {
+			t.Error("Expect", err)
+		}
+		if res == nil {
+			t.Error("Expect", err)
+
+		}
+	})
+}
+
+func TestVerifyCredential(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		err := authService.VerifyCredential(user1.Email, user1.Password)
+		if err == nil {
+			t.Error("Expect", err)
+		}
+	})
+}
+
+func TestLogin(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		err, _ := authService.Login(user1)
+		if err != nil {
+			t.Error("Expect", err)
+		}
+	})
+}
+
+func TestRegister(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		err, _ := authService.Register(user1)
+		if err != nil {
+			t.Error("Expect", err)
+		}
+	})
+}
+
+func TestResetPassword(t *testing.T) {
+	t.Run("Expect found the result", func(t *testing.T) {
+		err, _ := authService.ResetPassword(user1)
+		if err == nil {
+			t.Error("Expect", err)
+		}
+	})
 }
 
 func setup() {
@@ -40,35 +193,6 @@ func setup() {
 	jwtService = user.NewJWTService()
 	authService = user.NewAuthService(service, jwtService)
 
-}
-
-func TestGetCustomerByID(t *testing.T) {
-	t.Run("Expect found the result", func(t *testing.T) {
-		sID := strconv.Itoa(user1.ID)
-		result, _ := service.FindUserByID(sID)
-		if result.ID != user1.ID {
-			t.Error("Expect found customer id 1")
-		}
-	})
-}
-
-func ErrorContains(out error, want string) bool {
-	if out == nil {
-		return want == ""
-	}
-	if want == "" {
-		return false
-	}
-	return strings.Contains(out.Error(), want)
-}
-func TestGetCustomerByEmail(t *testing.T) {
-	t.Run("Expect found the result", func(t *testing.T) {
-		_, err := service.FindUserByEmail(user1.Email)
-		if !ErrorContains(err, "") {
-			t.Errorf("unexpected error: %v", err)
-		}
-
-	})
 }
 
 type inMemoryRepository struct {
