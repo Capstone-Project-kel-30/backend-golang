@@ -63,7 +63,7 @@ func RegisterModules(dbCon *util.DatabaseConnection, config *config.AppConfig) a
 	paymentService := paymentService.NewPaymentService(paymentRepo, memberService, userService)
 
 	classRepo := classRepo.ClassRepoFactory(dbCon)
-	classService := classService.NewClassService(classRepo, adminService)
+	classService := classService.NewClassService(classRepo)
 
 	bookingRepo := bookingRepo.BookingRepoFactory(dbCon)
 	bookingService := bookingService.NewBookingService(bookingRepo, userService, classService)
