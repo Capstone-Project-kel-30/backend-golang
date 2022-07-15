@@ -12,7 +12,6 @@ import (
 
 	imgBB "github.com/JohnNON/ImgBB"
 
-	"github.com/mashbens/cps/business/admin"
 	"github.com/mashbens/cps/business/newsletter/entity"
 	"github.com/mashbens/cps/config"
 )
@@ -36,27 +35,18 @@ type NewsService interface {
 }
 
 type newsService struct {
-	newsRepo     NewsRepo
-	adminService admin.AdminService
+	newsRepo NewsRepo
 }
 
 func NewNewsService(
 	NewsRepo NewsRepo,
-	adminService admin.AdminService,
 ) NewsService {
 	return &newsService{
-		newsRepo:     NewsRepo,
-		adminService: adminService,
+		newsRepo: NewsRepo,
 	}
 }
 
 func (c *newsService) InsertNews(news entity.News) (*entity.News, error) {
-	adminID := strconv.Itoa(news.AdminID)
-	admin, err := c.adminService.FindAdminByID(adminID)
-	if err != nil {
-		return nil, err
-	}
-	_ = admin
 
 	img := c.ImgUpload(news.ImgBB)
 	news.Img = img
@@ -69,16 +59,11 @@ func (c *newsService) InsertNews(news entity.News) (*entity.News, error) {
 }
 
 func (c *newsService) UpdateNews(news entity.News) (*entity.News, error) {
-	adminID := strconv.Itoa(news.AdminID)
-	admin, err := c.adminService.FindAdminByID(adminID)
-	if err != nil {
-		return nil, err
-	}
-	_ = admin
+
 	img := c.ImgUpload(news.ImgBB)
 	news.Img = img
 
-	news, err = c.newsRepo.UpdateNews(news)
+	news, err := c.newsRepo.UpdateNews(news)
 	if err != nil {
 		return nil, err
 	}
@@ -86,11 +71,6 @@ func (c *newsService) UpdateNews(news entity.News) (*entity.News, error) {
 }
 
 func (c *newsService) DeleteNews(adminID string, newsID string) error {
-	admin, err := c.adminService.FindAdminByID(adminID)
-	if err != nil {
-		return nil
-	}
-	_ = admin
 
 	news, err := c.FindNewsByID(newsID)
 	if err != nil {
