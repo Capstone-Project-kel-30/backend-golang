@@ -69,7 +69,7 @@ func RegisterModules(dbCon *util.DatabaseConnection, config *config.AppConfig) a
 	bookingService := bookingService.NewBookingService(bookingRepo, userService, classService)
 
 	newsletterRepo := newsletterRepo.NewsRepoFactory(dbCon)
-	newsletterService := newsletterService.NewNewsService(newsletterRepo, adminService)
+	newsletterService := newsletterService.NewNewsService(newsletterRepo)
 
 	controller := api.Controller{
 		UserAuth:   auth.NewAuthController(authService, userService),
