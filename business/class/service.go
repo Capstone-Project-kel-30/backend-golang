@@ -13,7 +13,6 @@ import (
 
 	imgBB "github.com/JohnNON/ImgBB"
 
-	"github.com/mashbens/cps/business/admin"
 	"github.com/mashbens/cps/business/class/entity"
 	"github.com/mashbens/cps/config"
 )
@@ -51,26 +50,18 @@ type ClassService interface {
 }
 
 type clasService struct {
-	classRepo    ClassRepo
-	adminService admin.AdminService
+	classRepo ClassRepo
 }
 
 func NewClassService(
 	ClassRepo ClassRepo,
-	adminService admin.AdminService,
 ) ClassService {
 	return &clasService{
-		classRepo:    ClassRepo,
-		adminService: adminService,
+		classRepo: ClassRepo,
 	}
 }
 func (c *clasService) InsertClass(class entity.Class) (*entity.Class, error) {
-	adminID := strconv.Itoa(class.AdminID)
-	admin, err := c.adminService.FindAdminByID(adminID)
-	if err != nil {
-		return nil, err
-	}
-	_ = admin
+
 	img := c.ImgUpload(class.ImgBB)
 
 	class.Img = img
@@ -84,16 +75,12 @@ func (c *clasService) InsertClass(class entity.Class) (*entity.Class, error) {
 }
 
 func (c *clasService) UpdateClass(class entity.Class) (*entity.Class, error) {
-	admin, err := c.adminService.FindAdminByID(strconv.Itoa(class.AdminID))
-	if err != nil {
-		return nil, errors.New("Admin not found")
-	}
-	_ = admin
+
 	img := c.ImgUpload(class.ImgBB)
 
 	class.Img = img
 
-	class, err = c.classRepo.UpdateClass(class)
+	class, err := c.classRepo.UpdateClass(class)
 	if err != nil {
 		return nil, err
 	}
@@ -102,11 +89,7 @@ func (c *clasService) UpdateClass(class entity.Class) (*entity.Class, error) {
 }
 
 func (c *clasService) DeleteClass(adminID string, classID string) error {
-	admin, err := c.adminService.FindAdminByID(adminID)
-	if err != nil {
-		return nil
-	}
-	_ = admin
+
 	class, err := c.FindClassByID(classID)
 	if err != nil {
 		return errors.New("Class not found")
