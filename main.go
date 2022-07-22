@@ -32,7 +32,7 @@ func main() {
 	}))
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Ditinggal pas lagi capston-capstonya - Gilan 2022")
+		return c.String(http.StatusOK, "ok")
 	})
 
 	api.RegisterRoutes(e, &controllers)
